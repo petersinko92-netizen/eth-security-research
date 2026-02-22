@@ -12,7 +12,6 @@ export const config = createConfig({
     chains: [primaryChain, mainnet],
     connectors: [
         metaMask(),
-        injected({ target: 'trust' }), // Explicit TrustWallet injection to prevent loading hang
         coinbaseWallet({ appName: 'Astra Rewards' }),
         walletConnect({
             projectId: 'ce47b5c5316db55b76ced621c3fa6812', // Public test ID or generate one at cloud.walletconnect.com
