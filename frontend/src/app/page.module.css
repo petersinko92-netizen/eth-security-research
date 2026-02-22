@@ -25,6 +25,13 @@
   margin-right: 1.5rem;
 }
 
+.topNavMetrics {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+  align-items: center;
+}
+
 .topNavRight {
   display: flex;
   gap: 1rem;
@@ -323,6 +330,29 @@
 }
 
 /* Connect / Actions */
+.connectGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.connectBoxBtn {
+  padding: 0.8rem;
+  background-color: #00a186;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.connectBoxBtn:hover {
+  background-color: #008770;
+}
+
 .verifyButton {
   background-color: #00a186;
   color: white;

