@@ -20,7 +20,8 @@ const metadata = {
 
 export const wagmiAdapter = new WagmiAdapter({
     networks: [mainnet],
-    projectId
+    projectId,
+    ssr: true
 })
 
 createAppKit({
