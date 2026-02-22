@@ -20,8 +20,7 @@ export const config = createConfig({
         })
     ],
     transports: {
-        [primaryChain.id]: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL || "https://eth-sepolia.g.alchemy.com/v2/ICIhD5eTNMgUdq9ogc9GC"),
-        // Fallback for wallets that bootstrap on mainnet specifically when testing on Sepolia
+        [sepolia.id]: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL || "https://eth-sepolia.g.alchemy.com/v2/ICIhD5eTNMgUdq9ogc9GC"),
         [mainnet.id]: http(),
     },
 })
