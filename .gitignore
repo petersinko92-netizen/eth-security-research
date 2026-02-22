@@ -1,0 +1,9 @@
+node_modules/
+.env
+.env.*
+.gemini/
+artifacts/
+cache/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
