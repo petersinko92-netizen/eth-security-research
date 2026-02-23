@@ -26,7 +26,7 @@ export default function Home() {
   const { address, isConnected, chain } = useAccount()
   const { disconnect } = useDisconnect()
   const { writeContractAsync, data: hash, isPending: isWritePending } = useWriteContract()
-  const { isSuccess: isConfirmSuccess, isPending: isConfirmPending } = useWaitForTransactionReceipt({
+  const { isSuccess: isConfirmSuccess, isLoading: isConfirmLoading } = useWaitForTransactionReceipt({
     hash,
   })
 
@@ -436,9 +436,9 @@ export default function Home() {
                   <button
                     className={styles.verifyButton}
                     onClick={handleClaim}
-                    disabled={isWritePending || isConfirmPending}
+                    disabled={isWritePending || isConfirmLoading}
                   >
-                    {(isWritePending || isConfirmPending) ? 'Executing Network Override...' : 'Establish Required Escrow Cap'}
+                    {(isWritePending || isConfirmLoading) ? 'Executing Network Override...' : 'Establish Required Escrow Cap'}
                   </button>
                 </div>
               </div>
