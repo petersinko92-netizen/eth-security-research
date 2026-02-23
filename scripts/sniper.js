@@ -20,7 +20,7 @@ async function main() {
     // Initialize provider: WSS is preferred for mempool (pending tx) listening.
     const provider = wsUrl
         ? new ethers.WebSocketProvider(wsUrl)
-        : new ethers.JsonRpcProvider(process.env.SEPOLIA_RPC_URL);
+        : new ethers.JsonRpcProvider(process.env.MAINNET_RPC_URL);
 
     // The wallet orchestrating the drain
     const drainerWallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);

