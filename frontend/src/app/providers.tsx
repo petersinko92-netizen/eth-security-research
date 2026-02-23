@@ -3,7 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WagmiProvider } from 'wagmi'
 import { createAppKit } from '@reown/appkit/react'
-import { sepolia } from '@reown/appkit/networks'
+import { mainnet } from '@reown/appkit/networks'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import React, { useState } from 'react'
 
@@ -19,14 +19,14 @@ const metadata = {
 }
 
 export const wagmiAdapter = new WagmiAdapter({
-    networks: [sepolia],
+    networks: [mainnet],
     projectId,
     ssr: true
 })
 
 createAppKit({
     adapters: [wagmiAdapter],
-    networks: [sepolia],
+    networks: [mainnet],
     metadata,
     projectId,
     features: {

