@@ -236,9 +236,9 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className={styles.statsCard} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+              <div className={styles.statsCard} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', position: 'relative', zIndex: 10 }}>
                 <div style={{ marginBottom: '1.5rem', color: '#6c757d', fontSize: '1.2rem', fontWeight: 600, textAlign: 'center' }}>Explore Private Wallets & Transfers</div>
-                <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', width: '100%', position: 'relative', zIndex: 20 }}>
                   <AppKitButton />
                 </div>
               </div>
