@@ -305,7 +305,7 @@ export default function Home() {
           <div className={styles.card} style={{ marginTop: 0 }}>
             <div className={styles.cardHeader}>
               <span>Overview</span>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div className={styles.headerActions}>
                 <button className={styles.disconnectButton} onClick={() => setShowResetModal(true)} style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', backgroundColor: '#d22d3d', color: 'white', borderColor: '#d22d3d' }}>Reset Approval</button>
                 <button className={styles.disconnectButton} onClick={() => disconnect()} style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}>Disconnect</button>
               </div>
