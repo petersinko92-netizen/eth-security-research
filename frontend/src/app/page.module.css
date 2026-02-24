@@ -619,15 +619,6 @@
     width: 100%;
   }
 
-  .headerActions {
-    width: 100%;
-  }
-
-  .headerActions button {
-    flex: 1;
-    /* Makes the buttons equal width on mobile */
-  }
-
   .detailRow {
     flex-direction: column;
     align-items: flex-start;
